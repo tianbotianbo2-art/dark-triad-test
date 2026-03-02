@@ -61,7 +61,69 @@ function topDim(scores) {
   return entries[0][0];
 }
 
-function shareCopy(scores, total100) {
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollLoot(td, scores, total100) {
+  const rarePool = [
+    '隐藏称号：黑金VIP（话不多，但每句都有目的）',
+    '隐藏称号：反脆弱（越不顺越清醒）',
+    '隐藏称号：情绪免疫体（不内耗，不解释）',
+    '隐藏称号：控场专家（你以为随缘，其实安排）',
+  ];
+
+  const perkPool = {
+    M: ['词条：利益雷达', '词条：留后手', '词条：信息差玩家', '词条：谈判增益', '词条：布局脑'],
+    N: ['词条：聚光灯体质', '词条：人设管理', '词条：夸夸充能', '词条：面子护盾', '词条：存在感buff'],
+    P: ['词条：情绪省电', '词条：边界结界', '词条：冷启动快', '词条：断联速度MAX', '词条：抽离技能'],
+  };
+
+  const spicePool = {
+    M: ['副作用：容易把人当项目', '副作用：信任成本偏高', '副作用：总想“别吃亏”'],
+    N: ['副作用：对敷衍过敏', '副作用：不被看见会掉电', '副作用：嘴上没事心里记账'],
+    P: ['副作用：共情需要手动开启', '副作用：翻篇速度太快', '副作用：容易被说“冷”'],
+  };
+
+  const loot = {
+    td,
+    total100,
+    perks: [pick(perkPool[td]), pick(perkPool[td])],
+    spice: pick(spicePool[td]),
+    rare: null,
+  };
+
+  // 8% rare drop
+  if (Math.random() < 0.08) loot.rare = pick(rarePool);
+
+  // If total is low, add a snarky line (still not insulting)
+  if (total100 <= 35 && Math.random() < 0.6) {
+    loot.spice = '副作用：看起来人畜无害，但别惹急';
+  }
+
+  // If very high, add a warning-ish line
+  if (total100 >= 78 && Math.random() < 0.7) {
+    loot.spice = '副作用：把人生当博弈玩，别人会累';
+  }
+
+  return loot;
+}
+
+function renderLoot(lootObj) {
+  if (!loot) return;
+  const tdName = { M: '主卡：策略怪', N: '主卡：舞台王', P: '主卡：冷脸切割' };
+  const tdSub = {
+    M: '表面讲道理，心里在算账。',
+    N: '没聚光灯也自带追光。',
+    P: '情绪不多，但边界感很硬。',
+  };
+
+  const parts = [];
+  parts.push(`<div class="cardlet"><div class="t">${tdName[lootObj.td]}</div><div class="s">${tdSub[lootObj.td]}</div><div class="tags">${lootObj.perks.map(t=>`<span class="tag">${t}</span>`).join('')}</div><div class="s" style="margin-top:10px">${lootObj.spice}</div>${lootObj.rare ? `<div class="tags" style="margin-top:10px"><span class="tag rare">${lootObj.rare}</span></div>` : ''}</div>`);
+  loot.innerHTML = parts.join('');
+}
+
+function shareCopy(scores, total100, lootObj) {
   const maxM = 7 * 3;
   const maxN = 7 * 3;
   const maxP = 6 * 3;
@@ -72,27 +134,15 @@ function shareCopy(scores, total100) {
   const td = topDim(scores);
 
   const hooks = {
-    M: '我测出来是【策略型影子玩家】——表面讲道理，心里在算账。',
-    N: '我居然是【舞台中心感拉满】——没聚光灯也要自带追光。',
-    P: '我是【冷静切割型人格】——情绪不多，但边界感很硬。',
+    M: '我抽到主卡【策略怪】——表面讲道理，心里在算账。',
+    N: '我抽到主卡【舞台王】——没聚光灯也要自带追光。',
+    P: '我抽到主卡【冷脸切割】——情绪不多，但边界感很硬。',
   };
 
   const roast = {
-    M: [
-      'M：算盘打得响，情绪放一边',
-      'N：不一定抢C位，但要掌控节奏',
-      'P：冷静到像在开会',
-    ],
-    N: [
-      'M：策略偶尔用，但更爱赢面子',
-      'N：夸我！现在！',
-      'P：冷脸不多，更多是“你不懂我”',
-    ],
-    P: [
-      'M：能谈就谈，不能谈就走',
-      'N：不爱抢C位，但别挡我路',
-      'P：心软？偶尔，但不影响我关门',
-    ],
+    M: ['M：算盘打得响，情绪放一边', 'N：不一定抢C位，但要掌控节奏', 'P：冷静到像在开会'],
+    N: ['M：策略偶尔用，但更爱赢面子', 'N：夸我！现在！', 'P：冷脸不多，更多是“你不懂我”'],
+    P: ['M：能谈就谈，不能谈就走', 'N：不爱抢C位，但别挡我路', 'P：心软？偶尔，但不影响我关门'],
   };
 
   const cta = {
@@ -101,14 +151,19 @@ function shareCopy(scores, total100) {
     P: '@一个“表面淡淡，其实最狠”的人来测（别装）。',
   };
 
+  const perkLine = lootObj ? `词条：${lootObj.perks.join(' / ')}` : '';
+  const rareLine = lootObj && lootObj.rare ? `稀有：${lootObj.rare}` : '';
+
   return [
     hooks[td],
     `暗黑指数：${total100}/100`,
+    perkLine,
+    rareLine,
     `${roast[td][0]}\n${roast[td][1]}\n${roast[td][2]}`,
-    `M(马基)：${scores.M}/${maxM}（${lvM}）  N(自恋)：${scores.N}/${maxN}（${lvN}）  P(冷静)：${scores.P}/${maxP}（${lvP}）`,
+    `M：${scores.M}/${maxM}（${lvM}）  N：${scores.N}/${maxN}（${lvN}）  P：${scores.P}/${maxP}（${lvP}）`,
     cta[td],
     '仅供娱乐，不构成任何诊断。',
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -207,6 +262,7 @@ const btnPrev = $('btn-prev');
 const btnExit = $('btn-exit');
 const btnRetry = $('btn-retry');
 const btnCopy = $('btn-copy');
+const btnReroll = $('btn-reroll');
 const btnExport = $('btn-export');
 const btnDownload = $('btn-download');
 const btnCloseExport = $('btn-close-export');
@@ -226,6 +282,7 @@ const shareText = $('share-text');
 const copyHint = $('copy-hint');
 const exportWrap = $('export-wrap');
 const exportImg = $('export-img');
+const loot = $('loot');
 
 const xm = $('x-m');
 const xn = $('x-n');
@@ -336,7 +393,7 @@ function renderBars(scores) {
   });
 }
 
-function buildPoster(scores, total100) {
+function buildPoster(scores, total100, lootObj) {
   // HiDPI export
   const W = 1080;
   const H = 1440;
@@ -448,6 +505,19 @@ function buildPoster(scores, total100) {
     ctx.fillText(tv, cx + cw - 44 - ctx.measureText(tv).width, y);
   });
 
+  // Loot lines
+  if (lootObj) {
+    ctx.fillStyle = 'rgba(242,242,245,0.72)';
+    ctx.font = '600 26px "IBM Plex Sans SC"';
+    const line1 = `词条：${lootObj.perks.join(' / ')}`;
+    ctx.fillText(line1, cx + 44, cy + ch - 145);
+    if (lootObj.rare) {
+      ctx.fillStyle = 'rgba(255,184,77,0.90)';
+      ctx.font = '700 26px "IBM Plex Sans SC"';
+      ctx.fillText(`稀有：${lootObj.rare}`, cx + 44, cy + ch - 105);
+    }
+  }
+
   // Footer
   ctx.fillStyle = 'rgba(242,242,245,0.60)';
   ctx.font = '500 24px "IBM Plex Sans SC"';
@@ -472,7 +542,10 @@ function renderResult() {
   if (xn) xn.textContent = '面子开关：输可以，但不能丢脸。';
   if (xp) xp.textContent = '心软开关：共情省电，切割省心。';
 
-  shareText.value = shareCopy(scores, total100);
+  const lootObj = rollLoot(topDim(scores), scores, total100);
+  renderLoot(lootObj);
+
+  shareText.value = shareCopy(scores, total100, lootObj);
   copyHint.textContent = '';
 
   // Hide export panel when re-rendering.
@@ -480,8 +553,8 @@ function renderResult() {
   exportImg.removeAttribute('src');
   btnDownload.setAttribute('href', '#');
 
-  // Cache for export
-  renderResult._last = { scores, total100 };
+  // Cache for export / reroll
+  renderResult._last = { scores, total100, lootObj };
 
   show(screenResult);
 }
@@ -534,7 +607,7 @@ btnCopy.addEventListener('click', async () => {
 btnExport.addEventListener('click', () => {
   const last = renderResult._last;
   if (!last) return;
-  const dataUrl = buildPoster(last.scores, last.total100);
+  const dataUrl = buildPoster(last.scores, last.total100, last.lootObj);
   exportImg.src = dataUrl;
   btnDownload.href = dataUrl;
   exportWrap.classList.remove('hidden');
@@ -543,6 +616,19 @@ btnExport.addEventListener('click', () => {
 
 btnCloseExport.addEventListener('click', () => {
   exportWrap.classList.add('hidden');
+});
+
+btnReroll.addEventListener('click', () => {
+  const last = renderResult._last;
+  if (!last) return;
+  const lootObj = rollLoot(topDim(last.scores), last.scores, last.total100);
+  renderLoot(lootObj);
+  last.lootObj = lootObj;
+  shareText.value = shareCopy(last.scores, last.total100, lootObj);
+  exportWrap.classList.add('hidden');
+  exportImg.removeAttribute('src');
+  btnDownload.setAttribute('href', '#');
+  copyHint.textContent = '已再抽一次（分数不变）。';
 });
 
 btnReset.addEventListener('click', (e) => {

@@ -109,6 +109,14 @@ h1{margin:0; font-family:var(--serif); font-weight:700; font-size:30px; line-hei
 textarea{width:100%; border-radius:14px; border:1px solid var(--line); background:rgba(0,0,0,.18); color:var(--ink); padding:12px; font-family:var(--sans); resize:vertical}
 .hint{min-height:20px; margin-top:8px; color:var(--muted); font-size:12px}
 
+.loot{display:grid; grid-template-columns:1fr; gap:10px; margin-top:8px}
+.cardlet{border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.14); border-radius:16px; padding:12px}
+.cardlet .t{font-weight:800; letter-spacing:.04em}
+.cardlet .s{color:rgba(242,242,245,.74); margin-top:6px; line-height:1.55}
+.tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.tag{font-size:12px; color:rgba(242,242,245,.82); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.14)}
+.tag.rare{border-color:rgba(255,184,77,.45); background:rgba(255,184,77,.12)}
+
 .export{margin-top:10px; padding-top:10px; border-top:1px solid var(--line)}
 .export img{width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.18)}
 

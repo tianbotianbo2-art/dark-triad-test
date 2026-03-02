@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="黑暗三角人格娱乐测试：20题快测，生成你的M/N/P三维结果。仅供娱乐。" />
+    <title>黑暗三角人格 | 娱乐测试</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=IBM+Plex+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="bg">
+      <div class="grain"></div>
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+    </div>
+
+    <main class="app" id="app">
+      <header class="top">
+        <div class="brand">
+          <div class="sigil" aria-hidden="true"></div>
+          <div>
+            <div class="kicker">ENTERTAINMENT ONLY</div>
+            <h1>黑暗三角人格</h1>
+          </div>
+        </div>
+        <div class="meta">
+          <span class="pill">20题</span>
+          <span class="pill">约2分钟</span>
+          <span class="pill">本地计算</span>
+        </div>
+      </header>
+
+      <section class="card" id="screen-home">
+        <p class="lead">轻量答题，快速生成你的三维结果：<strong>M</strong>（马基）、<strong>N</strong>（自恋）、<strong>P</strong>（精神变态倾向）。</p>
+        <div class="notice">
+          <div class="notice-title">声明</div>
+          <div class="notice-body">仅供娱乐与自我观察，不构成任何心理诊断或医疗建议。</div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="btn-start">开始测试</button>
+          <button class="btn ghost" id="btn-random">随机示例结果</button>
+        </div>
+      </section>
+
+      <section class="card hidden" id="screen-quiz" aria-live="polite">
+        <div class="progress">
+          <div class="progress-top">
+            <div class="progress-label"><span id="q-index">1</span> / <span id="q-total">20</span></div>
+            <div class="progress-dim" id="q-dim">M</div>
+          </div>
+          <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+        </div>
+
+        <h2 class="question" id="q-text">题目</h2>
+        <div class="options" id="opts"></div>
+
+        <div class="actions split">
+          <button class="btn ghost" id="btn-prev" disabled>上一题</button>
+          <button class="btn ghost" id="btn-exit">退出</button>
+        </div>
+      </section>
+
+      <section class="card hidden" id="screen-result">
+        <div class="result-head">
+          <div>
+            <div class="kicker">YOUR PROFILE</div>
+            <h2 class="result-title" id="result-title">黑暗三角画像</h2>
+          </div>
+          <div class="score">
+            <div class="score-num" id="score-total">0</div>
+            <div class="score-sub">暗黑指数 / 100</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-title">雷达图</div>
+            <canvas id="radar" width="520" height="360"></canvas>
+          </div>
+          <div class="panel">
+            <div class="panel-title">三维得分</div>
+            <div class="bars" id="bars"></div>
+          </div>
+        </div>
+
+        <div class="copy">
+          <div class="copy-title">分享文案</div>
+          <textarea id="share-text" rows="4" spellcheck="false"></textarea>
+          <div class="actions">
+            <button class="btn primary" id="btn-copy">复制文案</button>
+            <button class="btn ghost" id="btn-retry">再测一次</button>
+          </div>
+          <div class="hint" id="copy-hint"></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span>Made for quick testing • No tracking</span>
+        <a href="#" id="btn-reset">清空进度</a>
+      </footer>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

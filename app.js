@@ -55,6 +55,12 @@ function titleFrom(scores) {
   return map[top] || '黑暗三角画像';
 }
 
+function topDim(scores) {
+  const entries = Object.entries(scores);
+  entries.sort((a, b) => b[1] - a[1]);
+  return entries[0][0];
+}
+
 function shareCopy(scores, total100) {
   const maxM = 7 * 3;
   const maxN = 7 * 3;
@@ -63,11 +69,45 @@ function shareCopy(scores, total100) {
   const lvN = levelOf('N', scores.N, maxN);
   const lvP = levelOf('P', scores.P, maxP);
 
+  const td = topDim(scores);
+
+  const hooks = {
+    M: '我测出来是【策略型影子玩家】——表面讲道理，心里在算账。',
+    N: '我居然是【舞台中心感拉满】——没聚光灯也要自带追光。',
+    P: '我是【冷静切割型人格】——情绪不多，但边界感很硬。',
+  };
+
+  const roast = {
+    M: [
+      'M：算盘打得响，情绪放一边',
+      'N：不一定抢C位，但要掌控节奏',
+      'P：冷静到像在开会',
+    ],
+    N: [
+      'M：策略偶尔用，但更爱赢面子',
+      'N：夸我！现在！',
+      'P：冷脸不多，更多是“你不懂我”',
+    ],
+    P: [
+      'M：能谈就谈，不能谈就走',
+      'N：不爱抢C位，但别挡我路',
+      'P：心软？偶尔，但不影响我关门',
+    ],
+  };
+
+  const cta = {
+    M: '敢不敢@一个“人畜无害但最会安排”的朋友来对照？',
+    N: '评论区打“我最闪”我把链接丢你，顺便@一个爱装淡的人。',
+    P: '@一个“表面淡淡，其实最狠”的人来测（别装）。',
+  };
+
   return [
-    `我刚测了黑暗三角人格（娱乐版）`,
+    hooks[td],
     `暗黑指数：${total100}/100`,
+    `${roast[td][0]}\n${roast[td][1]}\n${roast[td][2]}`,
     `M(马基)：${scores.M}/${maxM}（${lvM}）  N(自恋)：${scores.N}/${maxN}（${lvN}）  P(冷静)：${scores.P}/${maxP}（${lvP}）`,
-    `仅供娱乐，不构成任何诊断。你也来测一下对照看看～`,
+    cta[td],
+    '仅供娱乐，不构成任何诊断。',
   ].join('\n');
 }
 

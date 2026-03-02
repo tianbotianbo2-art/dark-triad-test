@@ -91,9 +91,17 @@
           <textarea id="share-text" rows="4" spellcheck="false"></textarea>
           <div class="actions">
             <button class="btn primary" id="btn-copy">复制文案</button>
+            <button class="btn ghost" id="btn-export">导出配图</button>
             <button class="btn ghost" id="btn-retry">再测一次</button>
           </div>
           <div class="hint" id="copy-hint"></div>
+          <div class="export hidden" id="export-wrap">
+            <img id="export-img" alt="结果海报" />
+            <div class="actions">
+              <a class="btn primary" id="btn-download" download="dark-triad-result.png" href="#">下载图片</a>
+              <button class="btn ghost" id="btn-close-export">收起</button>
+            </div>
+          </div>
         </div>
       </section>
 

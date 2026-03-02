@@ -111,6 +111,17 @@ function shareCopy(scores, total100) {
   ].join('\n');
 }
 
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
 function drawRadar(canvas, scores) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width;
@@ -196,6 +207,9 @@ const btnPrev = $('btn-prev');
 const btnExit = $('btn-exit');
 const btnRetry = $('btn-retry');
 const btnCopy = $('btn-copy');
+const btnExport = $('btn-export');
+const btnDownload = $('btn-download');
+const btnCloseExport = $('btn-close-export');
 const btnReset = $('btn-reset');
 
 const qIndex = $('q-index');
@@ -210,6 +224,8 @@ const scoreTotal = $('score-total');
 const bars = $('bars');
 const shareText = $('share-text');
 const copyHint = $('copy-hint');
+const exportWrap = $('export-wrap');
+const exportImg = $('export-img');
 
 const KEY = 'dt_test_v1';
 
@@ -316,6 +332,126 @@ function renderBars(scores) {
   });
 }
 
+function buildPoster(scores, total100) {
+  // HiDPI export
+  const W = 1080;
+  const H = 1440;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, '#07070a');
+  g.addColorStop(1, '#0b0b12');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // Orbs
+  function orb(x, y, r, c0, c1) {
+    const gr = ctx.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, c0);
+    gr.addColorStop(1, c1);
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  orb(220, 260, 420, 'rgba(255,59,106,0.22)', 'rgba(255,59,106,0)');
+  orb(920, 1160, 460, 'rgba(255,184,77,0.18)', 'rgba(255,184,77,0)');
+
+  // Card
+  const pad = 72;
+  const cx = pad;
+  const cy = 160;
+  const cw = W - pad * 2;
+  const ch = H - 260;
+  ctx.fillStyle = 'rgba(18,18,26,0.72)';
+  ctx.strokeStyle = 'rgba(242,242,245,0.12)';
+  ctx.lineWidth = 2;
+  roundRect(ctx, cx, cy, cw, ch, 36);
+  ctx.fill();
+  ctx.stroke();
+
+  // Title
+  ctx.fillStyle = 'rgba(242,242,245,0.72)';
+  ctx.font = '500 26px "IBM Plex Sans SC"';
+  ctx.fillText('ENTERTAINMENT ONLY', cx + 44, cy + 70);
+
+  ctx.fillStyle = '#f2f2f5';
+  ctx.font = '700 60px "Noto Serif SC"';
+  ctx.fillText('黑暗三角人格', cx + 44, cy + 140);
+
+  // Result title + score
+  const rTitle = titleFrom(scores);
+  ctx.fillStyle = 'rgba(242,242,245,0.88)';
+  ctx.font = '700 44px "Noto Serif SC"';
+  ctx.fillText(rTitle, cx + 44, cy + 220);
+
+  ctx.fillStyle = '#ffb84d';
+  ctx.font = '700 120px "Noto Serif SC"';
+  const s = String(total100);
+  ctx.fillText(s, cx + cw - 44 - ctx.measureText(s).width, cy + 230);
+  ctx.fillStyle = 'rgba(242,242,245,0.72)';
+  ctx.font = '600 24px "IBM Plex Sans SC"';
+  ctx.fillText('暗黑指数 / 100', cx + cw - 44 - 190, cy + 265);
+
+  // Radar
+  const radar = document.createElement('canvas');
+  radar.width = 780;
+  radar.height = 520;
+  drawRadar(radar, scores);
+  ctx.drawImage(radar, cx + 44, cy + 260);
+
+  // Bars
+  const max = { M: 21, N: 21, P: 18 };
+  const dims = ['M', 'N', 'P'];
+  const startY = cy + 820;
+  const rowH = 110;
+  dims.forEach((d, i) => {
+    const y = startY + i * rowH;
+    ctx.fillStyle = 'rgba(242,242,245,0.9)';
+    ctx.font = '700 34px "Noto Serif SC"';
+    ctx.fillText(d, cx + 44, y);
+
+    ctx.fillStyle = 'rgba(242,242,245,0.66)';
+    ctx.font = '500 24px "IBM Plex Sans SC"';
+    ctx.fillText(DIM_LABEL[d], cx + 90, y);
+
+    // track
+    const tx = cx + 44;
+    const ty = y + 26;
+    const tw = cw - 88;
+    const th = 20;
+    ctx.fillStyle = 'rgba(242,242,245,0.10)';
+    roundRect(ctx, tx, ty, tw, th, 999);
+    ctx.fill();
+
+    const p = clamp(scores[d] / max[d], 0, 1);
+    const fw = Math.max(12, tw * p);
+    const fg = ctx.createLinearGradient(tx, 0, tx + tw, 0);
+    fg.addColorStop(0, 'rgba(94,242,194,0.95)');
+    fg.addColorStop(0.6, 'rgba(255,184,77,0.95)');
+    fg.addColorStop(1, 'rgba(255,59,106,0.95)');
+    ctx.fillStyle = fg;
+    roundRect(ctx, tx, ty, fw, th, 999);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(242,242,245,0.72)';
+    ctx.font = '600 24px "IBM Plex Sans SC"';
+    const tv = `${scores[d]}/${max[d]}（${levelOf(d, scores[d], max[d])}）`;
+    ctx.fillText(tv, cx + cw - 44 - ctx.measureText(tv).width, y);
+  });
+
+  // Footer
+  ctx.fillStyle = 'rgba(242,242,245,0.60)';
+  ctx.font = '500 24px "IBM Plex Sans SC"';
+  ctx.fillText('仅供娱乐，不构成任何诊断。', cx + 44, cy + ch - 70);
+
+  return canvas.toDataURL('image/png');
+}
+
 function renderResult() {
   const scores = computeScores();
   const totalRaw = scores.M + scores.N + scores.P; // max 60
@@ -329,6 +465,15 @@ function renderResult() {
 
   shareText.value = shareCopy(scores, total100);
   copyHint.textContent = '';
+
+  // Hide export panel when re-rendering.
+  exportWrap.classList.add('hidden');
+  exportImg.removeAttribute('src');
+  btnDownload.setAttribute('href', '#');
+
+  // Cache for export
+  renderResult._last = { scores, total100 };
+
   show(screenResult);
 }
 
@@ -375,6 +520,20 @@ btnCopy.addEventListener('click', async () => {
     document.execCommand('copy');
     copyHint.textContent = '已复制（兼容模式）。';
   }
+});
+
+btnExport.addEventListener('click', () => {
+  const last = renderResult._last;
+  if (!last) return;
+  const dataUrl = buildPoster(last.scores, last.total100);
+  exportImg.src = dataUrl;
+  btnDownload.href = dataUrl;
+  exportWrap.classList.remove('hidden');
+  copyHint.textContent = '海报已生成：可下载/保存后发小红书。';
+});
+
+btnCloseExport.addEventListener('click', () => {
+  exportWrap.classList.add('hidden');
 });
 
 btnReset.addEventListener('click', (e) => {

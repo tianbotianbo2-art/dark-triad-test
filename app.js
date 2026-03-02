@@ -227,6 +227,10 @@ const copyHint = $('copy-hint');
 const exportWrap = $('export-wrap');
 const exportImg = $('export-img');
 
+const xm = $('x-m');
+const xn = $('x-n');
+const xp = $('x-p');
+
 const KEY = 'dt_test_v1';
 
 let state = {
@@ -462,6 +466,11 @@ function renderResult() {
 
   renderBars(scores);
   drawRadar($('radar'), scores);
+
+  // 3-second explanations (short & sharp)
+  if (xm) xm.textContent = '算计开关：脑子先算账，嘴上再讲道理。';
+  if (xn) xn.textContent = '面子开关：输可以，但不能丢脸。';
+  if (xp) xp.textContent = '心软开关：共情省电，切割省心。';
 
   shareText.value = shareCopy(scores, total100);
   copyHint.textContent = '';
